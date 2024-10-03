@@ -6,7 +6,7 @@
  * See also: https://www.electron.build/code-signing
  */
 
-const {spawnSync} = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 
 /**
@@ -30,9 +30,9 @@ const stripCSC = function (environment) {
  */
 const getPlatformFlag = function () {
     switch (process.platform) {
-    case 'win32': return '--windows';
-    case 'darwin': return '--macos';
-    case 'linux': return '--linux';
+        case 'win32': return '--windows';
+        case 'darwin': return '--macos';
+        case 'linux': return '--linux';
     }
     throw new Error(`Could not determine platform flag for platform: ${process.platform}`);
 };
@@ -68,7 +68,7 @@ const runBuilder = function (wrapperConfig, target) {
         }
     }
     if (target.platform === 'win32' && wrapperConfig.mode !== 'dev') {
-        allArgs.push('--ia32', '--x64');
+        allArgs.push('--x64');
     }
     if (!wrapperConfig.doPackage) {
         allArgs.push('--dir', '--c.compression=store');
@@ -133,35 +133,35 @@ const calculateTargets = function (wrapperConfig) {
     };
     const targets = [];
     switch (process.platform) {
-    case 'win32':
-        // Run in two passes so we can skip signing the AppX for distribution through the MS Store.
-        // targets.push(availableTargets.microsoftStore);
-        targets.push(availableTargets.windowsDirectDownload);
-        break;
-    case 'darwin':
-        // Running 'dmg' and 'mas' in the same pass causes electron-builder to skip signing the non-MAS app copy.
-        // Running them as separate passes means they can both get signed.
-        // Seems like a bug in electron-builder...
-        // Running the 'mas' build first means that its output is available while we wait for 'dmg' notarization.
-        // Add macAppStoreDev here to test a MAS-like build locally. You'll need a Mac Developer provisioning profile.
-        if (fs.existsSync(masDevProfile)) {
-            targets.push(availableTargets.macAppStoreDev);
-        } else {
-            console.log(`skipping target "${availableTargets.macAppStoreDev.name}": ${masDevProfile} missing`);
-        }
-        if (wrapperConfig.doSign) {
-            targets.push(availableTargets.macAppStore);
-        } else {
-            // electron-builder doesn't seem to support this configuration even if mac.type is "development"
-            console.log(`skipping target "${availableTargets.macAppStore.name}" because code-signing is disabled`);
-        }
-        targets.push(availableTargets.macDirectDownload);
-        break;
-    case 'linux':
-        targets.push(availableTargets.linuxDirectDownload);
-        break;
-    default:
-        throw new Error(`Could not determine targets for platform: ${process.platform}`);
+        case 'win32':
+            // Run in two passes so we can skip signing the AppX for distribution through the MS Store.
+            // targets.push(availableTargets.microsoftStore);
+            targets.push(availableTargets.windowsDirectDownload);
+            break;
+        case 'darwin':
+            // Running 'dmg' and 'mas' in the same pass causes electron-builder to skip signing the non-MAS app copy.
+            // Running them as separate passes means they can both get signed.
+            // Seems like a bug in electron-builder...
+            // Running the 'mas' build first means that its output is available while we wait for 'dmg' notarization.
+            // Add macAppStoreDev here to test a MAS-like build locally. You'll need a Mac Developer provisioning profile.
+            if (fs.existsSync(masDevProfile)) {
+                targets.push(availableTargets.macAppStoreDev);
+            } else {
+                console.log(`skipping target "${availableTargets.macAppStoreDev.name}": ${masDevProfile} missing`);
+            }
+            if (wrapperConfig.doSign) {
+                targets.push(availableTargets.macAppStore);
+            } else {
+                // electron-builder doesn't seem to support this configuration even if mac.type is "development"
+                console.log(`skipping target "${availableTargets.macAppStore.name}" because code-signing is disabled`);
+            }
+            targets.push(availableTargets.macDirectDownload);
+            break;
+        case 'linux':
+            targets.push(availableTargets.linuxDirectDownload);
+            break;
+        default:
+            throw new Error(`Could not determine targets for platform: ${process.platform}`);
     }
     return targets;
 };
@@ -189,28 +189,28 @@ const parseArgs = function () {
     let doPublish;
 
     switch (mode) {
-    case 'dev':
-        doPackage = true;
-        doSign = false;
-        doPublish = false;
-        break;
-    case 'dir':
-        doPackage = false;
-        doSign = false;
-        doPublish = false;
-        break;
-    case 'dist':
-        doPackage = true;
-        // doSign = true; // skip code signing before getting a certificate
-        doSign = false;
-        doPublish = false;
-        break;
-    case 'publish':
-        doPackage = true;
-        // doSign = true; // skip code signing before getting a certificate
-        doSign = false;
-        doPublish = true;
-        break;
+        case 'dev':
+            doPackage = true;
+            doSign = false;
+            doPublish = false;
+            break;
+        case 'dir':
+            doPackage = false;
+            doSign = false;
+            doPublish = false;
+            break;
+        case 'dist':
+            doPackage = true;
+            // doSign = true; // skip code signing before getting a certificate
+            doSign = false;
+            doPublish = false;
+            break;
+        case 'publish':
+            doPackage = true;
+            // doSign = true; // skip code signing before getting a certificate
+            doSign = false;
+            doPublish = true;
+            break;
     }
 
     return {
